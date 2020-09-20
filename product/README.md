@@ -1,6 +1,6 @@
 1. 프로젝트 내용
 
-   ##### In-Memory Cache 기능을 갖는 상품 카테고리와 상품정보 API Service
+   #### In-Memory Cache 기능을 갖는 상품 카테고리와 상품정보 API Service
 
 2. 시스템환경 
    * 개발환경 : Spring Data JPA / Querydsl
