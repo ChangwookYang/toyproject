@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
@@ -25,6 +24,15 @@ public class CategoryService {
 
 
     public CategoryDto search(Long id) {
+        Category category = (Category) CacheSvc.getInstance().getCacheData("category", id);
+        if(category != null){
+            String categoryName = category.getCategoryName();
+            if(category.getParent() != null){
+                Category parentCategory = (Category) CacheSvc.getInstance().getCacheData("category", category.getParent().getId());
+                categoryName = parentCategory.getCategoryName().concat("_").concat(category.getCategoryName());
+            }
+            return new CategoryDto(categoryName);
+        }
         return categoryRepository.search(id);
     }
 

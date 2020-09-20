@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LRUCache  implements Cache{
-
+    /**
+     * Least Recently Used Algorithm
+     * 가장 최근에 사용된 적이 없는 캐시의 메모리부터 대체
+     */
     private class Node {
         private Object key;
         private Object val;
@@ -34,6 +37,9 @@ public class LRUCache  implements Cache{
         tail.prev = head;
     }
 
+    /**
+     * 가장 최근에 사용한 값을 맨앞으로 이동
+     */
     private void insertToHead(Node node){
         this.head.next.prev = node;
         node.next = this.head.next;
@@ -60,7 +66,7 @@ public class LRUCache  implements Cache{
         }
         Node node = map.get(key);
         remove(node);
-        insertToHead(node);	// 맨앞에 가져다놓는다.
+        insertToHead(node);
         return node.val;
     }
 

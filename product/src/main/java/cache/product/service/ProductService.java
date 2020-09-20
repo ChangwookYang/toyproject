@@ -5,7 +5,6 @@ import cache.product.entity.Category;
 import cache.product.entity.Product;
 import cache.product.repository.CategoryRepository;
 import cache.product.repository.ProductRepository;
-import cache.product.repository.ProductSearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +18,13 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     public ProductDto search(Long id) {
+        Product product = (Product) CacheSvc.getInstance().getCacheData("product", id);
+        if(product != null){
+            return new ProductDto(product.getName()
+                                , product.getPrice()
+                                , productRepository.searchCategoryName(product.getId()).getCategoryName()
+                                , product.getBrand());
+        }
         return productRepository.search(id);
     }
 
@@ -29,9 +35,9 @@ public class ProductService {
             throw new Exception("일치하는 카테고리가 없습니다.");
         }
         Product product = new Product(productDto.getProductName()
-                , productDto.getPrice()
-                , findCategory
-                , productDto.getBrandName());
+                                    , productDto.getPrice()
+                                    , findCategory
+                                    , productDto.getBrandName());
         productRepository.save(product);
         return search(product.getId());
     }

@@ -1,6 +1,8 @@
 package cache.product.repository;
 
+import cache.product.dto.CategoryDto;
 import cache.product.dto.ProductDto;
+import cache.product.dto.QCategoryDto;
 import cache.product.dto.QProductDto;
 import cache.product.entity.Product;
 import cache.product.entity.QCategory;
@@ -13,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -51,6 +52,26 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     }
 
     @Override
+    public CategoryDto searchCategoryName(Long id) {
+        QCategory parentCategory = new QCategory("parentCategory");
+        return queryFactory
+                .select(new QCategoryDto(
+                        new CaseBuilder()
+                                .when(parentCategory.categoryName.isNull()).then(category.categoryName)
+                                .otherwise(parentCategory.categoryName.concat("_").concat(category.categoryName))
+                ))
+                .from(product)
+                .leftJoin(product.category, category)
+                .leftJoin(category.parent, parentCategory)
+                .where(productNoEq(id))
+                .fetchOne();
+    }
+
+    private BooleanExpression productNoEq(Long id) {
+        return id !=null ? product.id.eq(id): null;
+    }
+
+    @Override
     public Page<ProductDto> search(ProductSearchCondition condition, Pageable pageable) {
         QCategory parentCategory = new QCategory("parentCategory");
         List<ProductDto> content = queryFactory
@@ -75,7 +96,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom{
     }
 
     private BooleanExpression categoryNoEq(Long categoryNo) {
-        return StringUtils.hasText(String.valueOf(categoryNo)) ? category.id.eq(categoryNo): null;
+        return categoryNo !=null ? category.id.eq(categoryNo): null;
     }
 
 }
